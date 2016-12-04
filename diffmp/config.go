@@ -1,0 +1,59 @@
+package diffmp
+
+import (
+	"time"
+)
+
+// DMP stands for diff-match-patch. The structure contains the configuration
+// options for running the algorithm.
+type DMP struct {
+	// Number of seconds to map a diff before giving up (0 for infinity).
+	DiffTimeout time.Duration
+
+	// Cost of an empty edit operation in terms of edit characters.
+	DiffEditCost int
+
+	// How far to search for a match (0 = exact location, 1000+= broad match).
+	// A match this many characters away from the expected location will add
+	// 1.0 to the score (0.0 is a perfect match).
+	MatchDistance int
+
+	// When deleting a large block of text (over ~64 characters), how close do
+	// the contents have to be to match the expected contents. (0.0 =
+	// perfection, 1.0 = very loose).  Note that Match_Threshold controls how
+	// closely the end points of a delete need to match.
+	PatchDeleteThreshold float64
+
+	// Chunk size for context length.
+	PatchMargin int
+
+	// The number of bits in an int.
+	MatchMaxBits int
+
+	// At what point is no match declared (0.0 = perfection, 1.0 = very
+	// loose).
+	MatchThreshold float64
+}
+
+// New creates a new DMP object with default parameters.
+func New() *DMP {
+	// Defaults.
+	return &DMP{
+		DiffTimeout:          time.Second,
+		DiffEditCost:         4,
+		MatchThreshold:       0.5,
+		MatchDistance:        1000,
+		PatchDeleteThreshold: 0.5,
+		PatchMargin:          4,
+		MatchMaxBits:         32,
+	}
+}
+
+func deadline(timeout time.Duration) time.Time {
+	now := time.Now()
+	if timeout <= 0 {
+		const oneYear = 24 * time.Hour * 365
+		return now.Add(oneYear)
+	}
+	return now.Add(timeout)
+}
