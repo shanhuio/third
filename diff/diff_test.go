@@ -112,7 +112,7 @@ fmt.Printf("%s,%T",a,b)`
 one
 three
 four`
-	diff := &UnifiedDiff{
+	in := &Input{
 		A:        SplitLines(a),
 		B:        SplitLines(b),
 		FromFile: "Original",
@@ -121,7 +121,7 @@ four`
 		ToDate:   "2010-04-02 10:20:52",
 		Context:  3,
 	}
-	result, _ := UnifiedDiffString(diff)
+	result, _ := UnifiedDiffString(in)
 	fmt.Println(strings.Replace(result, "\t", " ", -1))
 	// Output:
 	// --- Original 2005-01-26 23:30:50
@@ -136,16 +136,9 @@ four`
 }
 
 func ExampleContextDiffCode() {
-	a := `one
-two
-three
-four
-fmt.Printf("%s,%T",a,b)`
-	b := `zero
-one
-tree
-four`
-	diff := &ContextDiff{
+	a := "one\ntwo\nthree\nfour\n" + `fmt.Printf("%s,%T",a,b)`
+	b := "zero\none\ntree\nfour"
+	in := &Input{
 		A:        SplitLines(a),
 		B:        SplitLines(b),
 		FromFile: "Original",
@@ -153,7 +146,7 @@ four`
 		Context:  3,
 		Eol:      "\n",
 	}
-	result, _ := ContextDiffString(diff)
+	result, _ := ContextDiffString(in)
 	fmt.Print(strings.Replace(result, "\t", " ", -1))
 	// Output:
 	// *** Original
@@ -173,15 +166,9 @@ four`
 }
 
 func ExampleContextDiffString() {
-	a := `one
-two
-three
-four`
-	b := `zero
-one
-tree
-four`
-	diff := &ContextDiff{
+	a := "one\ntwo\nthree\nfour"
+	b := "zero\none\ntree\nfour"
+	in := &Input{
 		A:        SplitLines(a),
 		B:        SplitLines(b),
 		FromFile: "Original",
@@ -189,7 +176,7 @@ four`
 		Context:  3,
 		Eol:      "\n",
 	}
-	result, _ := ContextDiffString(diff)
+	result, _ := ContextDiffString(in)
 	fmt.Printf(strings.Replace(result, "\t", " ", -1))
 	// Output:
 	// *** Original
@@ -265,12 +252,12 @@ func TestSFBugsRatioForNullSeqn(t *testing.T) {
 func TestSFBugsComparingEmptyLists(t *testing.T) {
 	groups := NewMatcher(nil, nil).GroupedOpCodes(-1)
 	assertEqual(t, len(groups), 0)
-	diff := &UnifiedDiff{
+	in := &Input{
 		FromFile: "Original",
 		ToFile:   "Current",
 		Context:  3,
 	}
-	result, err := UnifiedDiffString(diff)
+	result, err := UnifiedDiffString(in)
 	assertEqual(t, err, nil)
 	assertEqual(t, result, "")
 }
@@ -317,7 +304,7 @@ func TestOutputFormatRangeFormatContext(t *testing.T) {
 }
 
 func TestOutputFormatTabDelimiter(t *testing.T) {
-	diff := &UnifiedDiff{
+	in := &Input{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
 		FromFile: "Original",
@@ -326,13 +313,13 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 		ToDate:   "2010-04-12 10:20:52",
 		Eol:      "\n",
 	}
-	ud, err := UnifiedDiffString(diff)
+	ud, err := UnifiedDiffString(in)
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(ud)[:2], []string{
 		"--- Original\t2005-01-26 23:30:50\n",
 		"+++ Current\t2010-04-12 10:20:52\n",
 	})
-	cd, err := ContextDiffString((*ContextDiff)(diff))
+	cd, err := ContextDiffString(in)
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd)[:2], []string{
 		"*** Original\t2005-01-26 23:30:50\n",
@@ -341,29 +328,29 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 }
 
 func TestOutputFormatNoTrailingTabOnEmptyFiledate(t *testing.T) {
-	diff := &UnifiedDiff{
+	in := &Input{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
 		FromFile: "Original",
 		ToFile:   "Current",
 		Eol:      "\n",
 	}
-	ud, err := UnifiedDiffString(diff)
+	ud, err := UnifiedDiffString(in)
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(ud)[:2], []string{"--- Original\n", "+++ Current\n"})
 
-	cd, err := ContextDiffString((*ContextDiff)(diff))
+	cd, err := ContextDiffString(in)
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd)[:2], []string{"*** Original\n", "--- Current\n"})
 }
 
 func TestOmitFilenames(t *testing.T) {
-	diff := &UnifiedDiff{
+	in := &Input{
 		A:   SplitLines("o\nn\ne\n"),
 		B:   SplitLines("t\nw\no\n"),
 		Eol: "\n",
 	}
-	ud, err := UnifiedDiffString(diff)
+	ud, err := UnifiedDiffString(in)
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(ud), []string{
 		"@@ -0,0 +1,2 @@\n",
@@ -375,7 +362,7 @@ func TestOmitFilenames(t *testing.T) {
 		"\n",
 	})
 
-	cd, err := ContextDiffString((*ContextDiff)(diff))
+	cd, err := ContextDiffString(in)
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd), []string{
 		"***************\n",

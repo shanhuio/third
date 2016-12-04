@@ -20,7 +20,7 @@ def
 `
 
 func main() {
-	d := &diff.UnifiedDiff{
+	d := &diff.Input{
 		A:        diff.SplitLines(strings.TrimSpace(f1)),
 		B:        diff.SplitLines(strings.TrimSpace(f2)),
 		FromFile: "a",
