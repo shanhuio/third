@@ -50,24 +50,13 @@ func WriteContextDiff(writer io.Writer, in *Input) error {
 		'e': "  ",
 	}
 
-	started := false
-	m := NewMatcher(in.A, in.B)
-	for _, g := range m.GroupedOpCodes(in.Context) {
-		if !started {
-			started = true
-			fromDate := ""
-			if len(in.FromDate) > 0 {
-				fromDate = "\t" + in.FromDate
-			}
-			toDate := ""
-			if len(in.ToDate) > 0 {
-				toDate = "\t" + in.ToDate
-			}
-			if in.FromFile != "" || in.ToFile != "" {
-				wf("*** %s%s%s", in.FromFile, fromDate, in.Eol)
-				wf("--- %s%s%s", in.ToFile, toDate, in.Eol)
-			}
-		}
+	m := NewMatcher(in.A.Lines, in.B.Lines)
+	codes := m.GroupedOpCodes(in.Context)
+	if len(codes) > 0 && (in.A.Name != "" || in.B.Name != "") {
+		wf("*** %s%s", in.A.title(), in.Eol)
+		wf("--- %s%s", in.B.title(), in.Eol)
+	}
+	for _, g := range codes {
 
 		first, last := g[0], g[len(g)-1]
 		ws("***************" + in.Eol)
@@ -80,7 +69,7 @@ func WriteContextDiff(writer io.Writer, in *Input) error {
 					if cc.Tag == 'i' {
 						continue
 					}
-					for _, line := range in.A[cc.I1:cc.I2] {
+					for _, line := range in.A.slice(cc.I1, cc.I2) {
 						ws(prefix[cc.Tag] + line)
 					}
 				}
@@ -97,7 +86,7 @@ func WriteContextDiff(writer io.Writer, in *Input) error {
 					if cc.Tag == 'd' {
 						continue
 					}
-					for _, line := range in.B[cc.J1:cc.J2] {
+					for _, line := range in.B.slice(cc.J1, cc.J2) {
 						ws(prefix[cc.Tag] + line)
 					}
 				}

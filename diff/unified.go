@@ -52,30 +52,23 @@ func WriteUnifiedDiff(writer io.Writer, in *Input) error {
 		in.Eol = "\n"
 	}
 
-	started := false
-	m := NewMatcher(in.A, in.B)
-	for _, g := range m.GroupedOpCodes(in.Context) {
-		if !started {
-			started = true
-			fromDate := ""
-			if len(in.FromDate) > 0 {
-				fromDate = "\t" + in.FromDate
+	m := NewMatcher(in.A.Lines, in.B.Lines)
+	codes := m.GroupedOpCodes(in.Context)
+
+	if len(codes) > 0 {
+		if in.A.Name != "" || in.B.Name != "" {
+			err := wf("--- %s%s", in.A.title(), in.Eol)
+			if err != nil {
+				return err
 			}
-			toDate := ""
-			if len(in.ToDate) > 0 {
-				toDate = "\t" + in.ToDate
-			}
-			if in.FromFile != "" || in.ToFile != "" {
-				err := wf("--- %s%s%s", in.FromFile, fromDate, in.Eol)
-				if err != nil {
-					return err
-				}
-				err = wf("+++ %s%s%s", in.ToFile, toDate, in.Eol)
-				if err != nil {
-					return err
-				}
+			err = wf("+++ %s%s", in.B.title(), in.Eol)
+			if err != nil {
+				return err
 			}
 		}
+	}
+
+	for _, g := range codes {
 		first, last := g[0], g[len(g)-1]
 		range1 := formatRangeUnified(first.I1, last.I2)
 		range2 := formatRangeUnified(first.J1, last.J2)
@@ -85,7 +78,7 @@ func WriteUnifiedDiff(writer io.Writer, in *Input) error {
 		for _, c := range g {
 			i1, i2, j1, j2 := c.I1, c.I2, c.J1, c.J2
 			if c.Tag == 'e' {
-				for _, line := range in.A[i1:i2] {
+				for _, line := range in.A.slice(i1, i2) {
 					if err := ws(" " + line); err != nil {
 						return err
 					}
@@ -93,14 +86,14 @@ func WriteUnifiedDiff(writer io.Writer, in *Input) error {
 				continue
 			}
 			if c.Tag == 'r' || c.Tag == 'd' {
-				for _, line := range in.A[i1:i2] {
+				for _, line := range in.A.slice(i1, i2) {
 					if err := ws("-" + line); err != nil {
 						return err
 					}
 				}
 			}
 			if c.Tag == 'r' || c.Tag == 'i' {
-				for _, line := range in.B[j1:j2] {
+				for _, line := range in.B.slice(j1, j2) {
 					if err := ws("+" + line); err != nil {
 						return err
 					}
