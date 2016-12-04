@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 
-	"shanhu.io/third/diffmp"
+	"shanhu.io/third/diff"
 )
 
 const f1 = `
@@ -16,9 +17,16 @@ def
 `
 
 func main() {
-	config := diffmp.New()
-	diffs := config.DiffMain(f1, f2, false)
-	for _, d := range diffs {
-		fmt.Println(d)
+	d := &diff.UnifiedDiff{
+		A:        diff.SplitLines(f1),
+		B:        diff.SplitLines(f2),
+		FromFile: "a",
+		ToFile:   "b",
+		Context:  3,
 	}
+	text, err := diff.UnifiedDiffString(d)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(text)
 }

@@ -112,7 +112,7 @@ fmt.Printf("%s,%T",a,b)`
 one
 three
 four`
-	diff := UnifiedDiff{
+	diff := &UnifiedDiff{
 		A:        SplitLines(a),
 		B:        SplitLines(b),
 		FromFile: "Original",
@@ -145,7 +145,7 @@ fmt.Printf("%s,%T",a,b)`
 one
 tree
 four`
-	diff := ContextDiff{
+	diff := &ContextDiff{
 		A:        SplitLines(a),
 		B:        SplitLines(b),
 		FromFile: "Original",
@@ -181,7 +181,7 @@ four`
 one
 tree
 four`
-	diff := ContextDiff{
+	diff := &ContextDiff{
 		A:        SplitLines(a),
 		B:        SplitLines(b),
 		FromFile: "Original",
@@ -265,7 +265,7 @@ func TestSFBugsRatioForNullSeqn(t *testing.T) {
 func TestSFBugsComparingEmptyLists(t *testing.T) {
 	groups := NewMatcher(nil, nil).GroupedOpCodes(-1)
 	assertEqual(t, len(groups), 0)
-	diff := UnifiedDiff{
+	diff := &UnifiedDiff{
 		FromFile: "Original",
 		ToFile:   "Current",
 		Context:  3,
@@ -317,7 +317,7 @@ func TestOutputFormatRangeFormatContext(t *testing.T) {
 }
 
 func TestOutputFormatTabDelimiter(t *testing.T) {
-	diff := UnifiedDiff{
+	diff := &UnifiedDiff{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
 		FromFile: "Original",
@@ -332,7 +332,7 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 		"--- Original\t2005-01-26 23:30:50\n",
 		"+++ Current\t2010-04-12 10:20:52\n",
 	})
-	cd, err := ContextDiffString(ContextDiff(diff))
+	cd, err := ContextDiffString((*ContextDiff)(diff))
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd)[:2], []string{
 		"*** Original\t2005-01-26 23:30:50\n",
@@ -341,7 +341,7 @@ func TestOutputFormatTabDelimiter(t *testing.T) {
 }
 
 func TestOutputFormatNoTrailingTabOnEmptyFiledate(t *testing.T) {
-	diff := UnifiedDiff{
+	diff := &UnifiedDiff{
 		A:        splitChars("one"),
 		B:        splitChars("two"),
 		FromFile: "Original",
@@ -352,13 +352,13 @@ func TestOutputFormatNoTrailingTabOnEmptyFiledate(t *testing.T) {
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(ud)[:2], []string{"--- Original\n", "+++ Current\n"})
 
-	cd, err := ContextDiffString(ContextDiff(diff))
+	cd, err := ContextDiffString((*ContextDiff)(diff))
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd)[:2], []string{"*** Original\n", "--- Current\n"})
 }
 
 func TestOmitFilenames(t *testing.T) {
-	diff := UnifiedDiff{
+	diff := &UnifiedDiff{
 		A:   SplitLines("o\nn\ne\n"),
 		B:   SplitLines("t\nw\no\n"),
 		Eol: "\n",
@@ -375,7 +375,7 @@ func TestOmitFilenames(t *testing.T) {
 		"\n",
 	})
 
-	cd, err := ContextDiffString(ContextDiff(diff))
+	cd, err := ContextDiffString((*ContextDiff)(diff))
 	assertEqual(t, err, nil)
 	assertEqual(t, SplitLines(cd), []string{
 		"***************\n",
