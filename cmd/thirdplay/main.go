@@ -3,23 +3,26 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"shanhu.io/third/diff"
 )
 
 const f1 = `
+xxx
 abcdef
 `
 
 const f2 = `
+xxx
 abc
 def
 `
 
 func main() {
 	d := &diff.UnifiedDiff{
-		A:        diff.SplitLines(f1),
-		B:        diff.SplitLines(f2),
+		A:        diff.SplitLines(strings.TrimSpace(f1)),
+		B:        diff.SplitLines(strings.TrimSpace(f2)),
 		FromFile: "a",
 		ToFile:   "b",
 		Context:  3,
