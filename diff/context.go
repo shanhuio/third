@@ -115,3 +115,17 @@ func ContextDiffString(in *Input) (string, error) {
 	err := WriteContextDiff(w, in)
 	return string(w.Bytes()), err
 }
+
+// formatRangeContext converts range to the "ed" format.
+func formatRangeContext(start, stop int) string {
+	// Per the diff spec at http://www.unix.org/single_unix_specification/
+	beginning := start + 1 // lines start numbering with one
+	length := stop - start
+	if length == 0 {
+		beginning-- // empty ranges begin at line just before the range
+	}
+	if length <= 1 {
+		return fmt.Sprintf("%d", beginning)
+	}
+	return fmt.Sprintf("%d,%d", beginning, beginning+length-1)
+}
