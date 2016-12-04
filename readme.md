@@ -3,5 +3,5 @@ with no circular dependencies among files.
 
 Origins:
 
-- `diff`: `github.com/pmezard/go-difflib/difflib`
+- `diff`: `github.com/pmezard/go-difflib`
 - `diffmp`: `github.com/sergi/go-diff`
