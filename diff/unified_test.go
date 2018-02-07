@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func ExampleUnifiedDiffCode() {
+func ExampleUnifiedDiffString() {
 	a := `one
 two
 three

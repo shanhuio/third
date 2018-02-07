@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func ExampleContextDiffCode() {
+func ExampleContextDiffString() {
 	a := "one\ntwo\nthree\nfour\n" + `fmt.Printf("%s,%T",a,b)`
 	b := "zero\none\ntree\nfour"
 	in := &Input{

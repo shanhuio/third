@@ -82,5 +82,4 @@ func CommonOverlap(s1, s2 string) int {
 			length++
 		}
 	}
-	return 0
 }
